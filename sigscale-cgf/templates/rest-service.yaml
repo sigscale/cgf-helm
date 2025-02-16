@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-cgf-rest
+  labels:
+    {{- include "sigscale-cgf.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "sigscale-cgf.selectorLabels" . | nindent 6 }}
+  type: {{ .Values.restService.type }}
+  ports:
+  - protocol: TCP
+    appProtocol: http
+    {{- if .Values.restService.clusterIP }}
+    clusterIP: {{ .Values.restService.clusterIP }}
+    {{- end }}
+    port: {{ .Values.restService.port }}
+    targetPort: rest

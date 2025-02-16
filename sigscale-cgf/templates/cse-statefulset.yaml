@@ -1,0 +1,185 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ include "sigscale-cgf.fullname" . }}
+  labels:
+    {{- include "sigscale-cgf.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "sigscale-cgf.selectorLabels" . | nindent 6 }}
+  serviceName: otp-cgf
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "sigscale-cgf.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "sigscale-cgf.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
+      terminationGracePeriodSeconds: 30
+      initContainers:
+      - name: cgf-init
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: ERLARGS
+        {{- if .Values.cgfConfig.create }}
+          value: {{ cat .Values.erlangArgs "-config config/sys" | quote }}
+        {{- else }}
+          value: {{ .Values.erlangArgs | quote }}
+        {{- end }}
+        - name: ERLANG_COOKIE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-otp-dist
+              key: ERLANG_COOKIE
+        stdin: true
+        tty: true
+        command:
+        - bash
+        - "-c"
+        - |
+          set -e
+          [[ `hostname --fqdn` =~ (^.*)-([0-9]+)?.(.*)$ ]] || exit 1
+          hostbase=${BASH_REMATCH[1]}
+          ordinal=${BASH_REMATCH[2]}
+          domain=${BASH_REMATCH[3]}
+          if [[ ${ordinal} -eq 0 ]]; then
+            bin/initialize
+          else
+            bin/join cgf@${hostbase}-$((--ordinal)).${domain}
+          fi
+        ports:
+        - name: epmd
+          protocol: TCP
+          containerPort: 4369
+        - name: erl-rpc
+          protocol: TCP
+          containerPort: 54861
+        resources:
+          {{- toYaml .Values.podResources | nindent 12 }}
+        volumeMounts:
+        - name: cgf-data
+          mountPath: /home/otp/db
+        {{- if .Values.cgfConfig.create }}
+        - name: cgf-log
+          mountPath: /home/otp/log
+        - name: cgf-config
+          mountPath: /home/otp/config
+          readOnly: true
+        {{- end }}
+      containers:
+      - name: cgf
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: ERLARGS
+        {{- if .Values.cgfConfig.create }}
+          value: {{ cat .Values.erlangArgs "-config config/sys" | quote }}
+        {{- else }}
+          value: {{ .Values.erlangArgs | quote }}
+        {{- end }}
+        - name: ERLANG_COOKIE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-otp-dist
+              key: ERLANG_COOKIE
+        stdin: true
+        tty: true
+        ports:
+        - name: epmd
+          protocol: TCP
+          containerPort: 4369
+        - name: erl-rpc
+          protocol: TCP
+          containerPort: 54861
+        - name: rest
+          protocol: TCP
+          containerPort: 8080
+        {{- if .Values.sftpService.create }}
+        - name: sftp
+          protocol: {{ .Values.sftpService.protocol }}
+          containerPort: {{ .Values.sftpService.port }}
+        {{- end }}
+        volumeMounts:
+        - name: cgf-data
+          mountPath: /home/otp/db
+        - name: cgf-log
+          mountPath: /home/otp/log
+        {{- if .Values.cgfConfig.create }}
+        - name: cgf-config
+          mountPath: /home/otp/config
+          readOnly: true
+        {{- end }}
+        readinessProbe:
+          httpGet:
+            httpHeaders:
+              - name: Accept
+                value: application/health+json
+              - name: Authorization
+                value: Basic YWRtaW46YWRtaW4=
+            path: /health
+            port: rest
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 6
+        resources:
+          {{- toYaml .Values.Podesources | nindent 12 }}
+      {{- if .Values.cgfConfig.create }}
+      volumes:
+      - name: cgf-config
+        configMap:
+          name: {{ .Release.Name }}-cgf-config
+          items:
+          - key: "sys.config"
+            path: "sys.config"
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: cgf-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.dataVolume.size }}
+      {{- with .Values.dataVolume.class }}
+      storageClassName: {{ .Values.dataVolume.class }}
+      {{- end }}
+  - metadata:
+      name: cgf-log
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.logsVolume.size }}
+      {{- with .Values.logsVolume.class }}
+      storageClassName: {{ .Values.logsVolume.class }}
+      {{- end }}

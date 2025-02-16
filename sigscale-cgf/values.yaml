@@ -1,0 +1,45 @@
+# Default values for sigscale-cgf
+#
+replicaCount: 1
+image:
+  repository: sigscale/cgf
+  pullPolicy: IfNotPresent
+  tag: latest
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podLabels: {}
+restService:
+  type: LoadBalancer
+  clusterIP: ""
+  port: 80
+sftpService:
+  create: false
+  type: ClusterIP
+  clusterIP: ""
+  port: 22
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+podResources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+dataVolume:
+  size: 10Gi
+  class: ""
+logsVolume:
+  size: 10Gi
+  class: ""
+erlangArgs: ""
+cgfConfig:
+  create: false
+  sysConfig: "[]."

@@ -1,0 +1,10 @@
+{{- if .Values.cgfConfig.create -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-cgf-config
+  labels:
+    {{- include "sigscale-cgf.labels" . | nindent 4 }}
+data:
+  sys.config: {{ .Values.cgfConfig.sysConfig | quote }} 
+{{- end }}

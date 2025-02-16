@@ -1,0 +1,28 @@
+apiVersion: v2
+name: sigscale-cgf
+version: 1.0.0
+description: "SigScale CGF (Charging Gateway Function)"
+type: application
+keywords:
+  - 3gpp
+  - cgf
+  - asn1
+  - 5g
+  - cnf
+home: https://sigscale.com/solutions
+sources:
+  - https://github.com/sigscale/cgf
+maintainers: # (optional)
+  - name: SigScale
+    email: issues@sigscale.com
+    url: https://sigscale.org/contact
+icon: https://sigscale.org/esm-bundled/images/manifest/icon-96x96.png
+appVersion: "1.2.5-1"
+annotations:
+  artifacthub.io/category: networking
+  artifacthub.io/images: |
+    - name: cgf
+      image: sigscale/cgf:1.2.5-1
+      platforms:
+        - linux/amd64
+  artifacthub.io/license: Apache-2.0

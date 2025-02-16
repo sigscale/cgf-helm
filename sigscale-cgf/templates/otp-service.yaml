@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-otp-cgf
+  labels:
+    {{- include "sigscale-cgf.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "sigscale-cgf.selectorLabels" . | nindent 6 }}
+  type: ClusterIP
+  clusterIP: None

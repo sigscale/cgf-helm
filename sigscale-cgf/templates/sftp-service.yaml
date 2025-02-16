@@ -1,0 +1,20 @@
+{{- if .Values.sftpService.create -}}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-sftp
+  labels:
+    {{- include "sigscale-cgf.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "sigscale-cgf.selectorLabels" . | nindent 6 }}
+  type: {{ .Values.sftpService.type }}
+  ports:
+  - protocol: TCP
+    appProtocol: ssh
+    {{- if .Values.sftpService.clusterIP }}
+    clusterIP: {{ .Values.sftpService.clusterIP }}
+    {{- end }}
+    port: {{ .Values.sftpService.port }}
+    targetPort: sftp
+{{- end }}
