@@ -76,9 +76,9 @@ spec:
         volumeMounts:
         - name: cgf-data
           mountPath: /home/otp/db
-        {{- if .Values.cgfConfig.create }}
         - name: cgf-log
           mountPath: /home/otp/log
+        {{- if .Values.cgfConfig.create }}
         - name: cgf-config
           mountPath: /home/otp/config
           readOnly: true
