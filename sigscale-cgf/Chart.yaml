@@ -1,6 +1,6 @@
 apiVersion: v2
 name: sigscale-cgf
-version: 1.0.2
+version: 1.0.3
 description: "SigScale CGF (Charging Gateway Function)"
 type: application
 keywords:
@@ -22,7 +22,7 @@ annotations:
   artifacthub.io/category: networking
   artifacthub.io/changes: |
     - kind: fixed
-      description: "table initialization"
+      description: "correct log dir initialization"
   artifacthub.io/images: |
     - name: cgf
       image: sigscale/cgf:1.2.6-1
