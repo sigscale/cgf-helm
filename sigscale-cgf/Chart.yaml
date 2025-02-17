@@ -1,6 +1,6 @@
 apiVersion: v2
 name: sigscale-cgf
-version: 1.0.0
+version: 1.0.1
 description: "SigScale CGF (Charging Gateway Function)"
 type: application
 keywords:
@@ -20,6 +20,9 @@ icon: https://sigscale.org/esm-bundled/images/manifest/icon-96x96.png
 appVersion: "1.2.5-1"
 annotations:
   artifacthub.io/category: networking
+  artifacthub.io/changes:
+    - kind: changed
+      description: "expose sftp on well known port 22"
   artifacthub.io/images: |
     - name: cgf
       image: sigscale/cgf:1.2.5-1
