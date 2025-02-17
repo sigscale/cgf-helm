@@ -20,7 +20,7 @@ icon: https://sigscale.org/esm-bundled/images/manifest/icon-96x96.png
 appVersion: "1.2.5-1"
 annotations:
   artifacthub.io/category: networking
-  artifacthub.io/changes:
+  artifacthub.io/changes: |
     - kind: changed
       description: "expose sftp on well known port 22"
   artifacthub.io/images: |
