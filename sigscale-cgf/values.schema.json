@@ -151,7 +151,7 @@
 					"type": "integer",
 					"minimum": 0,
 					"maximum": 65535,
-					"default": 2905
+					"default": 22
 				}
 			},
 			"required": [
