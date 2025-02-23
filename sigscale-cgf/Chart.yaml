@@ -1,6 +1,6 @@
 apiVersion: v2
 name: sigscale-cgf
-version: 1.0.6
+version: 1.0.7
 description: "SigScale CGF (Charging Gateway Function)"
 type: application
 keywords:
@@ -17,17 +17,15 @@ maintainers: # (optional)
     email: issues@sigscale.com
     url: https://sigscale.org/contact
 icon: https://sigscale.org/esm-bundled/images/manifest/icon-96x96.png
-appVersion: "1.2.7-1"
+appVersion: "1.2.9-1"
 annotations:
   artifacthub.io/category: networking
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "file path join in event action handler"
-    - kind: changed
-      description: "default image pull policy"
+    - kind: added
+      description: "action handlers for unzip, untar"
   artifacthub.io/images: |
     - name: cgf
-      image: sigscale/cgf:1.2.7-1
+      image: sigscale/cgf:1.2.9-1
       platforms:
         - linux/amd64
   artifacthub.io/license: Apache-2.0
